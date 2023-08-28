@@ -18,11 +18,14 @@ int main()
 	tree.insert(node3);
 	tree.insert(node4);
 
-	tree.BFS([&nodes](StaticNode& node) -> void
+	tree.DFS([&nodes](StaticNode& node) -> void
 		{
 			std::string data{ node.dataBuffer };
 			nodes += stoi(data.substr(2, 1));
-		});
+		},  [](StaticNode& node)
+			{
+				return true;
+			});
 
 	std::cout << nodes;
 	system("pause");

@@ -4,6 +4,7 @@
 #include <queue>
 #include <memory>
 
+
 struct StaticNode
 {
 	char dataBuffer[32];
@@ -14,8 +15,6 @@ struct StaticNode
 class StaticBinTree
 {
 private:
-
-
 	std::vector<StaticNode> m_nodes{ StaticNode{} };
 	const std::size_t m_root = 1;
 
@@ -32,8 +31,9 @@ public:
 
 	void insert(const StaticNode& node);
 	template <typename T> void BFS(T func);
-	template <typename T> void DFS(T func);
-	
+	template<typename T, typename F> void staticBinTreeDFSHelper(StaticNode& node, T func, F eval);
+	template<typename T, typename F> void DFS(T func, F eval = true);
+
 	[[nodiscard]] constexpr auto
 		getRoot() const->std::size_t;
 
@@ -67,7 +67,8 @@ public:
 	void insert(const DynamicNode& node);
 	void setRoot(const DynamicNode& root) { m_root_p = std::make_shared<DynamicNode>(root); }
 	template <typename T> void BFS(T func);
-	template <typename T> void DFS(T func);
+	template<typename T, typename F> void DFS(T func, F eval = true);
+	template<typename T, typename F> void dynamicBinTreeDFSHelper(DynamicNode* node, T func, F eval);
 
 
 	[[nodiscard]] auto
@@ -92,6 +93,29 @@ inline void StaticBinTree::BFS(T func)
 	}
 }
 
+template<typename T, typename F>
+void StaticBinTree::staticBinTreeDFSHelper(StaticNode& node, T func, F eval)
+{
+	int evaluation = eval(node);
+	if (evaluation > 0)
+	{
+		func(node);
+	}
+	else if (evaluation == -1)
+	{
+		return;
+	}
+	
+	if (node.lChild != 0) staticBinTreeDFSHelper(m_nodes.at(node.lChild), func, eval);
+	if (node.lChild != 0) staticBinTreeDFSHelper(m_nodes.at(node.rChild), func, eval);
+}
+
+template<typename T, typename F>
+inline void StaticBinTree::DFS(T func, F eval)
+{
+	staticBinTreeDFSHelper(m_nodes.at(m_root), func, eval);
+}
+
 template<typename T>
 inline void DynamicBinTree::BFS(T func)
 {
@@ -106,4 +130,27 @@ inline void DynamicBinTree::BFS(T func)
 		if (now_p->rChild_p != nullptr) searchQueue.push(now_p->rChild_p);
 
 	}
+}
+
+
+template<typename T, typename F>
+void DynamicBinTree::dynamicBinTreeDFSHelper(DynamicNode* node, T func, F eval)
+{
+	int evaluation = eval(node);
+	if (evaluation > 0)
+	{
+		func(node);
+	}
+	else if (evaluation == -1)
+	{
+		return;
+	}
+	if (node->lChild_p != nullptr) dynamicBinTreeDFSHelper(node.lChild_p, func, eval);
+	if (node->lChild_p != nullptr) dynamicBinTreeDFSHelper(node.rChild_p, func, eval);
+}
+
+template<typename T, typename F>
+inline void DynamicBinTree::DFS(T func, F eval)
+{
+	DynamicBinTreeDFSHelper(m_root_p, func, eval);
 }
